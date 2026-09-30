@@ -1,0 +1,148 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: database
+    environment:
+      POSTGRES_DB: "${POSTGRES_DB:-joomla}"
+      POSTGRES_USER: "${POSTGRES_USER:-joomla}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-JoomlaPg2026Comm}"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d:ro
+      - nginx_logs:/var/log/nginx-joomla:ro
+    networks:
+      - backend_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      retries: 20
+
+  joomla:
+    image: joomla:6-apache
+    container_name: joomla
+    environment:
+      JOOMLA_DB_TYPE: pgsql
+      JOOMLA_DB_HOST: database:5432
+      JOOMLA_DB_NAME: "${POSTGRES_DB:-joomla}"
+      JOOMLA_DB_USER: "${POSTGRES_USER:-joomla}"
+      JOOMLA_DB_PASSWORD: "${POSTGRES_PASSWORD:-JoomlaPg2026Comm}"
+      JOOMLA_DB_PREFIX: "${JOOMLA_DB_PREFIX:-jos_}"
+      JOOMLA_SITE_NAME: "${JOOMLA_SITE_NAME:-Portal Mecatronica UMNG}"
+      JOOMLA_ADMIN_USER: "${JOOMLA_ADMIN_USER:-Administrador Parcial}"
+      JOOMLA_ADMIN_USERNAME: "${JOOMLA_ADMIN_USERNAME:-admin}"
+      JOOMLA_ADMIN_PASSWORD: "${JOOMLA_ADMIN_PASSWORD:-AdminJoomla2026Comm}"
+      JOOMLA_ADMIN_EMAIL: "${JOOMLA_ADMIN_EMAIL:-admin@parcial.edu.co}"
+    volumes:
+      - joomla_data:/var/www/html
+    networks:
+      - frontend_net
+      - backend_net
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fs -o /dev/null http://localhost/ || exit 1"]
+      interval: 15s
+      retries: 10
+      start_period: 180s
+
+  jupyter:
+    build: ./jupyter
+    container_name: jupyter
+    command:
+      - start-notebook.py
+      - --ServerApp.base_url=/jupyter/
+      - --ServerApp.default_url=/lab/tree/work/analisis_datos.ipynb
+      - --IdentityProvider.token=
+      - --ServerApp.password=
+    environment:
+      PGHOST: database
+      PGPORT: "5432"
+      PGDATABASE: "${POSTGRES_DB:-joomla}"
+      PGUSER: "${POSTGRES_USER:-joomla}"
+      PGPASSWORD: "${POSTGRES_PASSWORD:-JoomlaPg2026Comm}"
+    volumes:
+      - ./jupyter/notebooks:/home/jovyan/work
+    networks:
+      - frontend_net
+      - backend_net
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8888/jupyter/api')"]
+      interval: 15s
+      retries: 10
+      start_period: 30s
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GF_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GF_ADMIN_PASSWORD:-GrafanaAdmin2026}"
+      GF_SERVER_ROOT_URL: "%(protocol)s://%(domain)s/grafana/"
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/provisioning/dashboards/joomla_logs.json
+      POSTGRES_DB: "${POSTGRES_DB:-joomla}"
+      POSTGRES_USER: "${POSTGRES_USER:-joomla}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-JoomlaPg2026Comm}"
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana_data:/var/lib/grafana
+    networks:
+      - frontend_net
+      - backend_net
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:3000/grafana/api/health || wget -q -O /dev/null http://localhost:3000/api/health || exit 1"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - nginx_logs:/var/log/nginx/joomla
+    networks:
+      - frontend_net
+    depends_on:
+      joomla:
+        condition: service_healthy
+      jupyter:
+        condition: service_healthy
+      grafana:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/nginx-health || exit 1"]
+      interval: 10s
+      retries: 5
+
+networks:
+  frontend_net:
+    name: frontend_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.10.0/24
+  backend_net:
+    name: backend_net
+    driver: bridge
+    internal: true
+    ipam:
+      config:
+        - subnet: 172.30.20.0/24
+
+volumes:
+  pg_data:
+  joomla_data:
+  grafana_data:
+  nginx_logs:

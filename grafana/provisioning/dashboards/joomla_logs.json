@@ -1,0 +1,71 @@
+{
+  "uid": "joomla-trafico",
+  "title": "Joomla - Trafico",
+  "timezone": "browser",
+  "editable": true,
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Peticiones por minuto según clase HTTP",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg-parcial" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg-parcial" },
+          "editorMode": "code",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "SELECT $__timeGroupAlias(ts, '1m'), (status/100)::text || 'xx' AS metric, count(*) AS value FROM monitoreo.nginx_access WHERE $__timeFilter(ts) GROUP BY 1, 2 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 80,
+            "stacking": { "group": "A", "mode": "normal" }
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "mode": "multi", "sort": "none" }
+      }
+    },
+    {
+      "id": 2,
+      "type": "barchart",
+      "title": "Peticiones por código HTTP",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg-parcial" },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": { "type": "grafana-postgresql-datasource", "uid": "pg-parcial" },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT status::text AS codigo, count(*) AS peticiones FROM monitoreo.nginx_access WHERE $__timeFilter(ts) GROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "options": {
+        "xField": "codigo",
+        "showValue": "always",
+        "orientation": "auto",
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": false },
+        "tooltip": { "mode": "single" }
+      }
+    }
+  ]
+}
