@@ -12,7 +12,15 @@ Integrantes: Carlos Oyola · Nombre 2 · Nombre 3
 - Docker y Docker Compose v2
 - Puerto 80 libre
 
-## Arranque
+## Arranque sin comandos (Windows)
+
+1. Abrir **Docker Desktop** y esperar a que diga *Engine running*.
+2. En GitHub: **Code → Download ZIP** y descomprimir.
+3. Entrar a la carpeta descomprimida y hacer **doble clic en `iniciar.bat`**.
+   Levanta los 5 contenedores y abre Joomla, Grafana y Jupyter en el navegador.
+4. Para apagar: doble clic en `detener.bat`.
+
+## Arranque con comandos
 
 ```bash
 git clone <URL_DEL_REPOSITORIO>
