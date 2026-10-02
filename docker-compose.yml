@@ -1,3 +1,5 @@
+name: parcial-comm
+
 services:
   database:
     image: postgres:16-alpine
