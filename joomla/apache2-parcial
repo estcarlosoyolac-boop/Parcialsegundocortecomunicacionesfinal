@@ -1,0 +1,10 @@
+#!/bin/bash
+# Se ejecuta despues de la instalacion automatica de Joomla.
+# 1) Copia las imagenes del proyecto a /var/www/html/images/parcial
+# 2) Crea (una sola vez) el articulo de portada con texto e imagenes
+# 3) Arranca Apache en primer plano
+mkdir -p /var/www/html/images/parcial
+cp /parcial/img/* /var/www/html/images/parcial/ 2>/dev/null || true
+chown -R www-data:www-data /var/www/html/images/parcial
+php /parcial/contenido.php || echo "[parcial] No se pudo crear el articulo de portada (se continua)."
+exec apache2-foreground

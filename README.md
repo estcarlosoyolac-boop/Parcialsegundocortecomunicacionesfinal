@@ -55,6 +55,7 @@ docker compose ps
 ```
 ├── docker-compose.yml
 ├── .env.example
+├── joomla/                                # portada automática (texto + imágenes) creada al arrancar
 ├── nginx/default.conf                      # reverse proxy + log TSV de Joomla
 ├── database/init/01-monitoreo.sql          # file_fdw: el log de nginx como tabla
 ├── jupyter/Dockerfile

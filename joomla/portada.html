@@ -1,0 +1,18 @@
+<p>Este sitio Joomla forma parte de una infraestructura de <strong>5 contenedores</strong> desplegada con un solo comando (<code>docker compose up -d</code>). Todo el tráfico entra por <strong>nginx</strong> en el puerto 80, que actúa como reverse proxy hacia Joomla, Jupyter y Grafana. La base de datos <strong>PostgreSQL</strong> vive en una red interna aislada.</p>
+<p style="text-align:center"><img src="images/parcial/arquitectura.svg" alt="Arquitectura de la solución" style="max-width:100%;height:auto;border:1px solid #ccc;border-radius:8px"></p>
+<h3>Servicios del despliegue</h3>
+<table class="table table-striped">
+<thead><tr><th>Servicio</th><th>Ruta</th><th>Función</th></tr></thead>
+<tbody>
+<tr><td>Joomla</td><td><a href="/">/</a></td><td>Portal CMS, guarda su contenido en PostgreSQL</td></tr>
+<tr><td>Grafana</td><td><a href="/grafana/">/grafana/</a></td><td>Dashboard del tráfico HTTP hacia Joomla (códigos 2xx/3xx/4xx)</td></tr>
+<tr><td>Jupyter</td><td><a href="/jupyter/">/jupyter/</a></td><td>Cuaderno de análisis de datos precargado</td></tr>
+</tbody>
+</table>
+<h3>Redes</h3>
+<ul>
+<li><strong>frontend_net</strong> (172.30.10.0/24): nginx, Joomla, Jupyter y Grafana.</li>
+<li><strong>backend_net</strong> (172.30.20.0/24, <em>internal</em>): PostgreSQL, sin salida a internet.</li>
+</ul>
+<p>Cada visita a esta página queda registrada por nginx y aparece en el dashboard de Grafana en pocos segundos.</p>
+<p><em>Ingeniería Mecatrónica · Universidad Militar Nueva Granada</em></p>

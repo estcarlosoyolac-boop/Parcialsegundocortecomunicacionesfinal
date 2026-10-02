@@ -56,6 +56,10 @@ Paneles del dashboard:
 | Peticiones por minuto según clase HTTP (barras apiladas 2xx/3xx/4xx) | `SELECT $__timeGroupAlias(ts,'1m'), (status/100)::text \|\| 'xx' AS metric, count(*) ... GROUP BY 1,2` |
 | Peticiones por código HTTP (bar chart) | `SELECT status::text AS codigo, count(*) ... GROUP BY 1` |
 
+### 1.6 Contenido de portada automático
+
+La imagen oficial de Joomla instala el CMS vacío. Para que la portada muestre contenido sin intervención manual, el servicio `joomla` usa un envoltorio del entrypoint (`joomla/entrypoint-parcial.sh`). Primero deja que el entrypoint oficial instale Joomla contra PostgreSQL; después ejecuta `joomla/apache2-parcial`, que copia las imágenes de `joomla/img/` a `/var/www/html/images/parcial/` y corre `joomla/contenido.php`. Ese script inserta, una sola vez, un artículo destacado (tablas `jos_content`, `jos_content_frontpage` y `jos_workflow_associations`) con el texto de `joomla/portada.html`, la imagen de cabecera y el diagrama de arquitectura. Por último arranca Apache.
+
 ---
 
 ## Sección 2: Análisis del modelo OSI en la solución
