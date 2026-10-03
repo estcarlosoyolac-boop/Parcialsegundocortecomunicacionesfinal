@@ -4,7 +4,7 @@ Despliegue multi-contenedor (nginx, Joomla, PostgreSQL, Jupyter, Grafana) con Do
 
 Ingeniería Mecatrónica · UMNG
 Docente: Ing. Andrés Julián Moreno M.Sc.
-Integrantes: Carlos Oyola · Nombre 2 · Nombre 3
+Integrantes: Carlos Oyola · Samuel López · Angela Sánchez
 
 ![Arquitectura](docs/arquitectura.svg)
 

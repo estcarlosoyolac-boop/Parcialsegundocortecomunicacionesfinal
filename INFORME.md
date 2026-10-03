@@ -2,7 +2,7 @@
 
 **Despliegue multi-contenedor, orquestación y análisis del modelo OSI**
 Comunicaciones · Ingeniería Mecatrónica · UMNG — Docente: Ing. Andrés Julián Moreno M.Sc.
-Integrantes: Carlos Oyola · Nombre 2 · Nombre 3
+Integrantes: Carlos Oyola · Samuel López · Angela Sánchez
 
 ---
 
